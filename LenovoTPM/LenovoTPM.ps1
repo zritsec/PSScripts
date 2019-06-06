@@ -23,15 +23,26 @@
 
 function Get-LenovoTPM ($pcName)
 {
-  return gwmi -ComputerName $pcName -class Lenovo_BiosSetting -namespace root\wmi | ForEach-Object{ if ($_.CurrentSetting -like "SecurityChip*") {return $_.CurrentSetting.replace(","," = ")}}
+     return (Get-WmiObject -ComputerName 'MGH01014' -class Lenovo_BiosSetting -namespace root\wmi -Filter "CurrentSetting like 'SecurityChip%'").CurrentSetting.replace(","," = ")
 } 
 
 function Set-LenovoTPM ($pcName)
 {
-    (gwmi -ComputerName $pcName  -class Lenovo_SetBiosSetting –namespace root\wmi).SetBiosSetting("SecurityChip,Active")
-    (gwmi -ComputerName $pcName  -class Lenovo_SaveBiosSettings -namespace root\wmi).SaveBiosSettings()
+    (Get-WmiObject -ComputerName $pcName  -class Lenovo_SetBiosSetting –namespace root\wmi).SetBiosSetting("SecurityChip,Active")
+    (Get-WmiObject -ComputerName $pcName  -class Lenovo_SaveBiosSettings -namespace root\wmi).SaveBiosSettings()
 }
 
 #example
 $pcList = @('Comp1','Comp2')
-$pcList | %{Try { IF (test-connection -count 1 -ComputerName $_ -Quiet) {write-host $_ $(Get-LenovoTPM $_)} else {write-host $_ "Offline"}} Catch{Write-host $_.Exception.Message}}
+$pcList | Foreach-object{
+    Try { 
+        IF (test-connection -count 1 -ComputerName $_ -Quiet) {
+            write-host $_ $(Get-LenovoTPM $_)
+        } else {
+            write-host $_ "Offline"
+        }
+     } 
+     Catch{
+        Write-host $_.Exception.Message
+     }
+}
