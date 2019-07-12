@@ -23,7 +23,7 @@
 
 function Get-LenovoTPM ($pcName)
 {
-     return (Get-WmiObject -ComputerName 'MGH01014' -class Lenovo_BiosSetting -namespace root\wmi -Filter "CurrentSetting like 'SecurityChip%'").CurrentSetting.replace(","," = ")
+     return (Get-WmiObject -ComputerName $pcName -class Lenovo_BiosSetting -namespace root\wmi -Filter "CurrentSetting like 'SecurityChip%'").CurrentSetting.replace(","," = ")
 } 
 
 function Set-LenovoTPM ($pcName)
